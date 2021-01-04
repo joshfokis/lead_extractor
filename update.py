@@ -68,15 +68,20 @@ def update(updates):
     for url in updates:
         with requests.get(url) as r:
             for file in r.get('files'):
+                print(file)
                 update_files(file)
 
 def updater():
-    url = 'https://api.github.com/repo/joshfokis/lead_extractor/commits'
+    url = 'https://api.github.com/repos/joshfokis/lead_extractor/commits'
 
     files = get_files(__file__)
     info = appinfo()
     commits = get_commits(url)
     behind = compare_version(info.get('version'), commits, url)
+    print(files)
+    print(info)
+    print(commits)
+    print(behind)
 
     if behind[0] > 0:
         try:
