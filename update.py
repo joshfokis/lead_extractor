@@ -72,7 +72,7 @@ def update_files(file):
 
 def update(updates):
     logger.info('Updating files')
-    for url in updates:
+    for url in updates.reverse():
         with requests.get(url) as r:
             for file in r.json().get('files'):
                 backup(file.get('filename'))
