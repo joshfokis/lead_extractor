@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel('DEBUG')
 
 # Use FileHandler() to log to a file
-file_handler = logging.FileHandler("mylog.log")
+file_handler = logging.FileHandler("mylogs.log")
 formatter = logging.Formatter(log_format)
 file_handler.setFormatter(formatter)
 
@@ -29,24 +29,27 @@ def appinfo():
     try:
         with open('appinfo') as f:
             logger.info('Loading appinfo')
-            logger.debug(f.readline(0))
             f.seek(0)
             return json.loads(f.read())
     except FileNotFoundError as fnf:
         logger.error(fnf)
-        logger.log()
+        logger.info('Creating appinfo')
         with open('appinfo','w') as f:
             f.write(json.dumps({'version':0,'latest_commit':'a9f12ee889e4d7417d26e0a0b73ad43e56d6ffc1'}))
 
 def get_commits(url):
+    logger.info("Getting commits.")
     with requests.get(url) as r:
+        logger.debug(f'Returned with {len(r.json())}')
         return r.json()
 
-def compare_version(version, commits, url):
+def compare_version(version, commits):
     count = 0
     commits = []
+    logger.info('Compairing commit versions.')
     for commit in commits:
         if version != commit.get('sha'):
+            logger.debug(f"{version=} -- commit{commit.get('sha')}")
             count += 1
             commits.append(commit.get('url'))
         else:
@@ -59,6 +62,7 @@ def update_files(file):
     ]
     if file.get('filename') in excluded:
         return
+    logger.info(f'Updating File {file.get("filename")}')
     with requests.get(file.get('raw_url')) as rf:
         with open(file.get('filename'),'w') as of:
             for line in rf:
@@ -67,6 +71,7 @@ def update_files(file):
         
 
 def update(updates):
+    logger.info('Updating files')
     for url in updates:
         with requests.get(url) as r:
             for file in r.get('files'):
@@ -75,27 +80,31 @@ def update(updates):
 
 def restore():
     files = get_files()
+    logger.info('Restoring backup files')
     for file in files:
         if file.endswith('.bak'):
+            logger.info(f'Restoring {file}')
             copy2(file, file.replace('.bak', ''))
             os.remove(file)
 
 def clean_up():
+    logger.info('Cleaning backup files')
     files = get_files()
     for file in files:
         if file.endswith('.bak'):
+            logger.info(f'Removing {file}')
             os.remove(file)
 
 def backup(file):
+    logger.info
     copy2(file, file+'.bak')
 
 def updater():
     url = 'https://api.github.com/repo/joshfokis/lead_extractor/commits'
-
     files = get_files(__file__)
     info = appinfo()
     commits = get_commits(url)
-    behind = compare_version(info.get('version'), commits, url)
+    behind = compare_version(info.get('version'), commits)
 
     if behind[0] > 0:
         try:
@@ -109,7 +118,7 @@ def updater():
         except Exception as e:
             print(f'Failed to update: {e}')
             restore()
+            logger.exception(e)
             return e
         
-
     return True
