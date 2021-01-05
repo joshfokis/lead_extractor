@@ -19,7 +19,7 @@ file_handler.setFormatter(formatter)
 # Don't forget to add the file handler
 logger.addHandler(file_handler)
 
-def get_files(current_file):
+def get_files():
     logger.info('Getting files')
     for dir_path, directory, files in os.walk(os.getcwd()):
         logger.debug(files)
@@ -102,7 +102,7 @@ def backup(file):
 
 def updater():
     url = 'https://api.github.com/repos/joshfokis/lead_extractor/commits'
-    files = get_files(__file__)
+    files = get_files()
     info = appinfo()
     commits = get_commits(url)
     behind = compare_version(info.get('latest_commit'), commits)
