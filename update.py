@@ -40,16 +40,16 @@ def get_commits(url):
     with requests.get(url) as r:
         return r.json()
 
-def compare_version(version, commits):
+def compare_version(version, commits, url):
     count = 0
-    updated_commits = []
+    commits = []
     for commit in commits:
         if version != commit.get('sha'):
             count += 1
-            updated_commits.append(commit.get('url'))
+            commits.append(commit.get('url'))
         else:
-            return count, updated_commits
-    return count, updated_commits
+            return count, commits
+    return count, commits
 
 def update_files(file):
     excluded = [
@@ -59,22 +59,24 @@ def update_files(file):
         return
     with requests.get(file.get('raw_url')) as rf:
         with open(file.get('filename'),'w') as of:
-            of.write(rf.text)
+            for line in rf:
+                of.write(line)
     return
         
 
 def update(updates):
     for url in updates:
         with requests.get(url) as r:
-            for file in r.json().get('files'):
+            for file in r.get('files'):
                 update_files(file)
 
 def updater():
-    url = 'https://api.github.com/repos/joshfokis/lead_extractor/commits'
-    commits = get_commits(url)
+    url = 'https://api.github.com/repo/joshfokis/lead_extractor/commits'
+
     files = get_files(__file__)
     info = appinfo()
-    behind = compare_version(version=info.get('latest_commit'), commits=commits)
+    commits = get_commits(url)
+    behind = compare_version(info.get('version'), commits, url)
 
     if behind[0] > 0:
         try:
@@ -82,6 +84,7 @@ def updater():
             info = appinfo()
             info['latest_commit'] = commits[0].get('sha')
             with open('appinfo') as f:
+                logger.info('updating appinfo')
                 f.write(json.dumps(info))
 
         except Exception as e:
