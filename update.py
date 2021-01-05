@@ -45,17 +45,17 @@ def get_commits(url):
 
 def compare_version(version, commits):
     count = 0
-    commits = []
+    latest_commits = []
     logger.info('Compairing commit versions.')
     logger.debug(f'{version=}')
     for commit in commits:
         if version != commit.get('sha'):
             logger.debug(f"{version=} -- commit{commit.get('sha')}")
             count += 1
-            commits.append(commit.get('url'))
+            latest_commits.append(commit.get('url'))
         else:
-            return count, commits
-    return count, commits
+            return count, latest_commits
+    return count, latest_commits
 
 def update_files(file):
     excluded = [
