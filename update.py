@@ -52,7 +52,7 @@ def compare_version(version, commits):
         if version != commit.get('sha'):
             logger.debug(f"{version=} -- commit{commit.get('sha')}")
             count += 1
-            latest_commits.append(commit.get('url'))
+            latest_commits.insert(0, commit.get('url'))
         else:
             return count, latest_commits
     return count, latest_commits
@@ -72,7 +72,7 @@ def update_files(file):
 
 def update(updates):
     logger.info('Updating files')
-    for url in updates.reverse():
+    for url in updates:
         with requests.get(url) as r:
             for file in r.json().get('files'):
                 backup(file.get('filename'))
