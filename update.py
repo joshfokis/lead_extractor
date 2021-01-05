@@ -66,7 +66,7 @@ def update_files(file):
     logger.info(f'Updating File {file.get("filename")}')
     with requests.get(file.get('raw_url')) as rf:
         with open(file.get('filename'),'w') as of:
-            of.write(rf)
+            of.write(rf.text)
     return
         
 
