@@ -104,7 +104,7 @@ def updater():
     files = get_files(__file__)
     info = appinfo()
     commits = get_commits(url)
-    behind = compare_version(info.get('version'), commits)
+    behind = compare_version(info.get('latest_commit'), commits)
 
     if behind[0] > 0:
         try:
