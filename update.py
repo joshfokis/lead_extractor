@@ -2,6 +2,8 @@ import json
 import os
 import requests
 import logging
+from shutil import copy2
+
 
 log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 logger = logging.getLogger(__name__)
@@ -10,7 +12,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel('DEBUG')
 
 # Use FileHandler() to log to a file
-file_handler = logging.FileHandler("mylogs.log")
+file_handler = logging.FileHandler("mylog.log")
 formatter = logging.Formatter(log_format)
 file_handler.setFormatter(formatter)
 
@@ -68,7 +70,24 @@ def update(updates):
     for url in updates:
         with requests.get(url) as r:
             for file in r.get('files'):
+                backup(file.get('filename'))
                 update_files(file)
+
+def restore():
+    files = get_files()
+    for file in files:
+        if file.endswith('.bak'):
+            copy2(file, file.replace('.bak', ''))
+            os.remove(file)
+
+def clean_up():
+    files = get_files()
+    for file in files:
+        if file.endswith('.bak'):
+            os.remove(file)
+
+def backup(file):
+    copy2(file, file+'.bak')
 
 def updater():
     url = 'https://api.github.com/repo/joshfokis/lead_extractor/commits'
@@ -86,10 +105,10 @@ def updater():
             with open('appinfo') as f:
                 logger.info('updating appinfo')
                 f.write(json.dumps(info))
-
+            clean_up()
         except Exception as e:
             print(f'Failed to update: {e}')
-            
+            restore()
             return e
         
 
