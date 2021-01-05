@@ -47,6 +47,7 @@ def compare_version(version, commits):
     count = 0
     commits = []
     logger.info('Compairing commit versions.')
+    logger.debug(f'{version=}')
     for commit in commits:
         if version != commit.get('sha'):
             logger.debug(f"{version=} -- commit{commit.get('sha')}")
