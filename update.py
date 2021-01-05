@@ -113,7 +113,7 @@ def updater():
             info['latest_commit'] = commits[0].get('sha')
             with open('appinfo') as f:
                 logger.info('updating appinfo')
-                f.write(json.dumps(info))
+                f.write(json.dumps(info),'w')
             clean_up()
         except Exception as e:
             print(f'Failed to update: {e}')
