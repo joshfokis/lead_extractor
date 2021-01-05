@@ -75,7 +75,7 @@ def update(updates):
     logger.info('Updating files')
     for url in updates:
         with requests.get(url) as r:
-            for file in r.get('files'):
+            for file in r.json().get('files'):
                 backup(file.get('filename'))
                 update_files(file)
 
